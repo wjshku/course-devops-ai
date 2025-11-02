@@ -55,6 +55,8 @@ pipeline {
                   ls -l /Applications/Docker.app/Contents/Resources/bin/docker || true
                   echo "Docker version:" 
                   docker version || { echo "ERROR: Docker CLI not found or daemon unavailable"; exit 1; }
+                  echo "Docker buildx version:"
+                  docker buildx version || echo "WARN: buildx plugin not found"
                 '''
             }
         }
@@ -68,10 +70,14 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    echo "2. Building Docker image..."
+                    echo "2. Building Docker image (linux/amd64)..."
                     // 使用 Git Commit 的前 7 位作为唯一的镜像标签
                     env.IMAGE_TAG = env.GIT_COMMIT.substring(0, 7)
-                    sh "docker build -t ${ECR_REPO_URL}:${env.IMAGE_TAG} ."
+                    sh '''
+                      docker buildx create --use || true
+                      docker buildx version || true
+                      docker buildx build --platform linux/amd64 -t ${ECR_REPO_URL}:${IMAGE_TAG} . --load
+                    '''
                     // 额外：对齐 Terraform 初始部署，推送 latest 标签
                     sh "docker tag ${ECR_REPO_URL}:${env.IMAGE_TAG} ${ECR_REPO_URL}:latest"
                 }
