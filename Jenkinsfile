@@ -18,6 +18,8 @@ pipeline {
         ECR_REPO_URL           = "${params.ECR_REPO_URL}"
         APP_RUNNER_SERVICE_ARN = "${params.APP_RUNNER_SERVICE_ARN}"
         AWS_REGION             = "${params.AWS_REGION}"
+        // 扩展 PATH 以找到 docker（Homebrew 与 Docker Desktop 常见路径）
+        PATH                  = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Docker.app/Contents/Resources/bin:${PATH}"
         // 代理（同时设置大小写，兼容不同工具）
         HTTP_PROXY  = "${params.HTTP_PROXY}"
         HTTPS_PROXY = "${params.HTTPS_PROXY}"
@@ -39,6 +41,21 @@ pipeline {
                         error "缺少必要的环境变量: ${missing.join(', ')}。请在 Jenkins Job 参数或环境中配置。"
                     }
                 }
+            }
+        }
+
+        stage('Preflight Docker') {
+            steps {
+                sh '''
+                  echo "PATH=$PATH"
+                  echo "Checking docker locations..."
+                  command -v docker || true
+                  ls -l /usr/local/bin/docker || true
+                  ls -l /opt/homebrew/bin/docker || true
+                  ls -l /Applications/Docker.app/Contents/Resources/bin/docker || true
+                  echo "Docker version:" 
+                  docker version || { echo "ERROR: Docker CLI not found or daemon unavailable"; exit 1; }
+                '''
             }
         }
         stage('Checkout') {
