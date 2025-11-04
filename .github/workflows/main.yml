@@ -61,7 +61,7 @@ jobs:
           echo "APP_RUNNER_SERVICE_NAME=$svc_name" >> $GITHUB_ENV
 
       - name: Deploy to App Runner
-        uses: awslabs/amazon-app-runner-deploy@v2
+        uses: awslabs/amazon-app-runner-deploy@main
         with:
           service: ${{ env.APP_RUNNER_SERVICE_NAME }}
           image: ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.TAG }}
