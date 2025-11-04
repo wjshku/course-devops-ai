@@ -60,12 +60,29 @@ jobs:
           svc_name=$(echo "${{ env.APP_RUNNER_ARN }}" | sed -E 's#^.*/service/([^/]+)/.*$#\1#')
           echo "APP_RUNNER_SERVICE_NAME=$svc_name" >> $GITHUB_ENV
 
+      - name: Fetch App Runner role ARNs
+        run: |
+          ACCESS_ROLE_ARN=$(aws apprunner describe-service \
+            --region "${{ env.AWS_REGION }}" \
+            --service-arn "${{ env.APP_RUNNER_ARN }}" \
+            --query 'Service.SourceConfiguration.AuthenticationConfiguration.AccessRoleArn' \
+            --output text)
+          INSTANCE_ROLE_ARN=$(aws apprunner describe-service \
+            --region "${{ env.AWS_REGION }}" \
+            --service-arn "${{ env.APP_RUNNER_ARN }}" \
+            --query 'Service.InstanceConfiguration.InstanceRoleArn' \
+            --output text)
+          echo "APP_RUNNER_ACCESS_ROLE_ARN=$ACCESS_ROLE_ARN" >> $GITHUB_ENV
+          echo "APP_RUNNER_INSTANCE_ROLE_ARN=$INSTANCE_ROLE_ARN" >> $GITHUB_ENV
+
       - name: Deploy to App Runner
         uses: awslabs/amazon-app-runner-deploy@main
         with:
           service: ${{ env.APP_RUNNER_SERVICE_NAME }}
           image: ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.TAG }}
           region: ${{ env.AWS_REGION }}
+          access-role-arn: ${{ env.APP_RUNNER_ACCESS_ROLE_ARN }}
+          instance-role-arn: ${{ env.APP_RUNNER_INSTANCE_ROLE_ARN }}
           wait-for-service-stability-seconds: 600
           
       - name: Deployment Complete
