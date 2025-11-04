@@ -35,6 +35,16 @@ jobs:
           role-to-assume: ${{ env.AWS_IAM_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # 2.1 校验 APP_RUNNER_ARN 是否为有效 ARN（避免把 URL 或名称当作 ARN）
+      - name: Validate App Runner ARN format
+        run: |
+          ARN="${{ env.APP_RUNNER_ARN }}"
+          if ! echo "$ARN" | grep -Eq '^arn:aws:apprunner:.*:service\/[^\/]+\/[^\/]+'; then
+            echo "❌ APP_RUNNER_ARN 不是有效的 App Runner ARN。示例：arn:aws:apprunner:<region>:<account-id>:service/<service-name>/<service-id>"
+            exit 1
+          fi
+          echo "✅ APP_RUNNER_ARN 格式校验通过。"
+
       # 3. 登录到 ECR
       - name: Log in to ECR
         id: ecr-login
@@ -83,6 +93,9 @@ jobs:
           region: ${{ env.AWS_REGION }}
           access-role-arn: ${{ env.APP_RUNNER_ACCESS_ROLE_ARN }}
           instance-role-arn: ${{ env.APP_RUNNER_INSTANCE_ROLE_ARN }}
+          port: 8080
+          cpu: 1024
+          memory: 2048
           wait-for-service-stability-seconds: 600
           
       - name: Deployment Complete
