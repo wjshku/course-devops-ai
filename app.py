@@ -64,7 +64,7 @@ class Query(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"message": "BEE EDU RAG Application is live!", "version": "v2"}
+    return {"message": "BEE EDU RAG Application is live!", "version": "v1"}
 
 @app.post("/chat")
 def chat(query: Query):
@@ -72,7 +72,7 @@ def chat(query: Query):
         # Lazy load RAG chain on first use
         chain = get_rag_chain()
         answer = chain.invoke(query.question)
-        return {"answer": f"Helpful Answer: V3 {answer}"}
+        return {"answer": f"Helpful Answer: V1 {answer}"}
     except Exception as e:
         # Return error message
         return {"error": str(e)}, 500
