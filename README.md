@@ -42,16 +42,7 @@
 - 需要允许 `iam:PassRole` 传递以下角色到 App Runner：
   - `bee-edu-apprunner-instance-role`
   - `bee-edu-apprunner-role`
-- 可选：后续稳定后可移除 `apprunner:CreateService`，并收紧 `iam:PassRole` 的 `iam:PassedToService` 条件到 `apprunner.amazonaws.com`。
-
-## 常见问题速查
-- 服务名校验失败：确保 `service` 设置为现有服务名（这里为 `bee-edu-rag-service`）；`APP_RUNNER_ARN` 必须是合法 ARN。
-- CPU/内存校验失败：按 Action 的单位使用 `cpu: 1`（vCPU）与 `memory: 2`（GB）。
-- `iam:PassRole` 被拒绝：确认 GitHub Actions 角色策略已允许对上述两角色执行 `iam:PassRole`。
 
 ## 版本固定（可选）
 - 为稳定性建议固定 Action 版本，例如：
   - `uses: awslabs/amazon-app-runner-deploy@v2.5.2`
-
----
-如需进一步定制（环境变量、标签、自动扩缩容等），可直接编辑 `/.github/workflows/main.yml` 的对应输入项。
