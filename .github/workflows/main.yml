@@ -50,10 +50,10 @@ jobs:
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 4. 定义镜像标签 (使用 GitHub SHA)
+      # 4. 定义镜像标签 (使用 latest)
       - name: Define Image Tag
         id: image-tag
-        run: echo "TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+        run: echo "TAG=latest" >> $GITHUB_ENV
 
       # 5. 构建并推送 Docker 镜像
       - name: Build and push Docker image
