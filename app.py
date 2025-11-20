@@ -72,7 +72,7 @@ def chat(query: Query):
         # Lazy load RAG chain on first use
         chain = get_rag_chain()
         answer = chain.invoke(query.question)
-        return {"answer": f"Helpful Answer: v1 {answer}"}
+        return {"answer": f"Helpful Answer: v2 {answer}"}
     except Exception as e:
         # Return error message
         return {"error": str(e)}, 500
